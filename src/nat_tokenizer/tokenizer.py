@@ -14,37 +14,39 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from safetensors.torch import load_file
 
-CONFIG_NAME, MODEL_NAME, REPOSITORY = "processor_config.json", "nat_tokenizer.pt", "ahad-j/nat-action-tokenizer"
+from .model import NATCodec
+
+CONFIG_NAME, WEIGHTS_NAME, REPOSITORY = "config.json", "model.safetensors", "ahad-j/nat-action-tokenizer"
+SAVED_FILES = (WEIGHTS_NAME, "README.md", "LICENSE")
 
 
 class NATActionTokenizer:
     def __init__(self, folder, action_min=None, action_max=None, **config):
         self.folder, self.device, self.cuda_graphs = Path(folder), torch.device("cpu"), None
-        self.model = torch.jit.load(str(self.folder / MODEL_NAME), map_location="cpu").eval()
+        self.model = NATCodec(config).eval().requires_grad_(False)
+        self.model.load_state_dict(load_file(str(self.folder / WEIGHTS_NAME)))
         self.action_min = None if action_min is None else np.asarray(action_min, dtype=np.float32)
         self.action_max = None if action_max is None else np.asarray(action_max, dtype=np.float32)
         self.horizon, self.slots, self.vocab_size = config["time_horizon"], config["group_width"], config["vocab_size"]
         self.prefix_tokens = {int(steps): tokens for steps, tokens in config["prefix_token_counts"].items()}
 
     @classmethod
-    def register_for_auto_class(cls, auto_class="AutoProcessor"):
-        """Called by transformers' AutoProcessor on remote-code classes; nothing to register."""
-
-    @classmethod
     def from_pretrained(cls, name_or_path=REPOSITORY, **keywords):
         folder = Path(name_or_path)
         if not folder.is_dir():
             from huggingface_hub import snapshot_download
-            folder = Path(snapshot_download(str(name_or_path), token=keywords.get("token"), revision=keywords.get("revision")))
+            folder = Path(snapshot_download(str(name_or_path), token=keywords.get("token"), revision=keywords.get("revision"),
+                                            allow_patterns=[CONFIG_NAME, *SAVED_FILES]))
         config = json.loads((folder / CONFIG_NAME).read_text())
         config.update({name: value for name, value in keywords.items() if name in ("action_min", "action_max")})
-        return cls(folder, **{name: value for name, value in config.items() if name not in ("auto_map", "processor_class")})
+        return cls(folder, **config)
 
     def save_pretrained(self, directory):
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)
-        for name in (MODEL_NAME, Path(__file__).name, "README.md", "LICENSE"):
+        for name in SAVED_FILES:
             if (self.folder / name).exists() and self.folder != directory:
                 (directory / name).write_bytes((self.folder / name).read_bytes())
         config = json.loads((self.folder / CONFIG_NAME).read_text())

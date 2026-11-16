@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "NAT action tokenizer: robot action chunks to time-ordered discrete tokens and back"
 authors = [{ name = "Ahad Jawaid" }]
 requires-python = ">=3.9"
-dependencies = ["numpy>=1.21", "torch>=2", "huggingface_hub>=0.20"]
+dependencies = ["numpy>=1.21", "torch>=2", "safetensors>=0.4", "huggingface_hub>=0.20"]
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

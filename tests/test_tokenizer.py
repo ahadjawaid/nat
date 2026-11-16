@@ -71,3 +71,8 @@ def test_gpu_and_cuda_graphs_agree_with_the_cpu(tokenizer):
     for cuda_graphs in (False, True):
         gpu = NATActionTokenizer.from_pretrained().to("cuda", cuda_graphs=cuda_graphs)
         assert np.mean(np.asarray(gpu(actions, normalize=False)) == cpu_tokens) > 0.99
+
+
+def test_the_downloaded_repository_holds_only_data(tokenizer):
+    assert sorted(path.name for path in tokenizer.folder.iterdir()) == ["LICENSE", "README.md", "config.json",
+                                                                        "model.safetensors"]

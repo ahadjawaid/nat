@@ -75,7 +75,7 @@ tokenizer = tokenizer.to("cuda", cuda_graphs=True)    # captures the encoder and
 ```
 
 Inputs and outputs stay NumPy. GPU results match the CPU up to floating point (rarely a token on a quantization
-boundary differs). The first few calls are slower while TorchScript optimizes the graph.
+boundary differs).
 
 ## API
 
@@ -94,12 +94,12 @@ boundary differs). The first few calls are slower while TorchScript optimizes th
 ## Model
 
 4 latents per chunk, 4 FSQ scales of 6,400 codes (one coarse token per two latents, three finer tokens per latent),
-trained on a large corpus of robot and human action data (every window once, batch 4,096). The model is TorchScript, so
-loading needs only torch and numpy.
+trained on a large corpus of robot and human action data (every window once, batch 4,096). The repository holds only
+the weights (`model.safetensors`) and a JSON config; the network is plain PyTorch in the `nat-tokenizer` package.
 
 ## Reconstruction on robot benchmarks, and speed
 
-Random 32-step chunks of each benchmark's demonstrations, each normalized by its own min and max (MetaWorld's actions clipped to the [-1, 1] its simulator executes). Errors are mean absolute differences between the input and its reconstruction. Speed is in milliseconds per call, on an RTX 4090 and 4 CPU threads, mean and SD over 20 calls.
+Random 32-step chunks of each benchmark's demonstrations, each normalized by its own min and max (MetaWorld's actions clipped to the [-1, 1] its simulator executes). Errors are mean absolute differences between the input and its reconstruction. Speed is in milliseconds per call on an RTX 4090 (shared with another job while measured) and 4 CPU threads, mean and SD over 20 calls.
 
 | benchmark | chunks x shape | MAE in [-1, 1] units | MAE | max error |
 |---|---|---|---|---|
@@ -110,12 +110,12 @@ Random 32-step chunks of each benchmark's demonstrations, each normalized by its
 
 | device | batch of 32 x 7 chunks | encode ms | decode ms |
 |---|---|---|---|
-| cpu, eager | 1 | 10.07 ± 0.03 | 19.47 ± 0.39 |
-| cpu, eager | 64 | 318.17 ± 0.08 | 243.77 ± 0.62 |
-| cuda, eager | 1 | 2.72 ± 0.07 | 4.68 ± 0.13 |
-| cuda, eager | 64 | 2.71 ± 0.04 | 4.99 ± 0.12 |
-| cuda, CUDA graphs | 1 | 0.44 ± 0.02 | 2.07 ± 0.02 |
-| cuda, CUDA graphs | 64 | 0.74 ± 0.01 | 3.49 ± 0.03 |
+| cpu, eager | 1 | 11.57 ± 0.39 | 29.86 ± 4.06 |
+| cpu, eager | 64 | 322.06 ± 1.76 | 263.23 ± 6.67 |
+| cuda, eager | 1 | 6.54 ± 1.67 | 11.07 ± 1.18 |
+| cuda, eager | 64 | 7.86 ± 2.41 | 12.67 ± 1.80 |
+| cuda, CUDA graphs | 1 | 0.71 ± 0.57 | 2.44 ± 0.39 |
+| cuda, CUDA graphs | 64 | 1.05 ± 0.35 | 5.18 ± 2.09 |
 
 ## Development
 
