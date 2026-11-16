@@ -42,9 +42,6 @@ from transformers import AutoProcessor
 tokenizer = AutoProcessor.from_pretrained("ahad-j/nat-action-tokenizer", trust_remote_code=True)
 ```
 
-Tokens and reconstructions are identical to the original NAT research code this tokenizer was trained and evaluated
-with (checked on CPU and GPU); this package is a standalone export of it.
-
 ## Normalization (on by default)
 
 The tokenizer was trained on actions in [-1, 1]. With `normalize=True` (the default) every column is mapped from
@@ -112,27 +109,23 @@ loading needs only torch and numpy.
 
 ## Reconstruction on robot benchmarks, and speed
 
-Random 32-step chunks of each benchmark's demonstrations, each normalized by its own min and max (MetaWorld's actions clipped to the [-1, 1] its simulator executes). Errors are mean absolute differences between the input and its reconstruction. "Original NAT code" is the research code this tokenizer was trained with, run on the same chunks; this package reproduces it exactly.
+Random 32-step chunks of each benchmark's demonstrations, each normalized by its own min and max (MetaWorld's actions clipped to the [-1, 1] its simulator executes). Errors are mean absolute differences between the input and its reconstruction. Speed is in milliseconds per call, on an RTX 4090 and 4 CPU threads, mean and SD over 20 calls.
 
-| data | chunks x shape | MAE in [-1, 1] units | MAE | max error | original NAT code MAE | identical tokens |
-|---|---|---|---|---|---|---|
-| LIBERO-10 | 1000 x (32, 7) | 0.0304 | 0.0210 | 1.9762 | 0.0210 | 100.0% |
-| MetaWorld mt4 (clipped) | 1000 x (32, 4) | 0.0651 | 0.0651 | 1.7578 | 0.0651 | 100.0% |
-| RoboMimic mt4 | 1000 x (32, 7) | 0.0466 | 0.0404 | 1.5712 | 0.0404 | 100.0% |
-| RoboCasa mt4 | 1000 x (32, 12) | 0.0130 | 0.0107 | 0.9970 | 0.0107 | 100.0% |
-
-| implementation | device | batch of 32 x 7 chunks | encode ms | decode ms |
+| benchmark | chunks x shape | MAE in [-1, 1] units | MAE | max error |
 |---|---|---|---|---|
-| nat-tokenizer | cpu, eager | 1 | 10.07 ± 0.03 | 19.47 ± 0.39 |
-| original NAT code | cpu, eager | 1 | 12.14 ± 0.10 | 23.72 ± 0.26 |
-| nat-tokenizer | cpu, eager | 64 | 318.17 ± 0.08 | 243.77 ± 0.62 |
-| original NAT code | cpu, eager | 64 | 321.37 ± 0.63 | 251.12 ± 0.62 |
-| nat-tokenizer | cuda, eager | 1 | 2.72 ± 0.07 | 4.68 ± 0.13 |
-| original NAT code | cuda, eager | 1 | 5.84 ± 0.32 | 8.79 ± 0.20 |
-| nat-tokenizer | cuda, eager | 64 | 2.71 ± 0.04 | 4.99 ± 0.12 |
-| original NAT code | cuda, eager | 64 | 5.58 ± 0.13 | 8.95 ± 0.16 |
-| nat-tokenizer | cuda, CUDA graphs | 1 | 0.44 ± 0.02 | 2.07 ± 0.02 |
-| nat-tokenizer | cuda, CUDA graphs | 64 | 0.74 ± 0.01 | 3.49 ± 0.03 |
+| LIBERO-10 | 1000 x (32, 7) | 0.0304 | 0.0210 | 1.9762 |
+| MetaWorld mt4 (clipped) | 1000 x (32, 4) | 0.0651 | 0.0651 | 1.7578 |
+| RoboMimic mt4 | 1000 x (32, 7) | 0.0466 | 0.0404 | 1.5712 |
+| RoboCasa mt4 | 1000 x (32, 12) | 0.0130 | 0.0107 | 0.9970 |
+
+| device | batch of 32 x 7 chunks | encode ms | decode ms |
+|---|---|---|---|
+| cpu, eager | 1 | 10.07 ± 0.03 | 19.47 ± 0.39 |
+| cpu, eager | 64 | 318.17 ± 0.08 | 243.77 ± 0.62 |
+| cuda, eager | 1 | 2.72 ± 0.07 | 4.68 ± 0.13 |
+| cuda, eager | 64 | 2.71 ± 0.04 | 4.99 ± 0.12 |
+| cuda, CUDA graphs | 1 | 0.44 ± 0.02 | 2.07 ± 0.02 |
+| cuda, CUDA graphs | 64 | 0.74 ± 0.01 | 3.49 ± 0.03 |
 
 ## Development
 
