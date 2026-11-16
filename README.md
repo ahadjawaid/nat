@@ -33,14 +33,6 @@ tokenizer.save_pretrained("my-nat-tokenizer")
 tokenizer = NATActionTokenizer.from_pretrained("my-nat-tokenizer")
 ```
 
-Without installing the package, `transformers` can load the same tokenizer from the Hugging Face repository's code
-(like `physical-intelligence/fast`):
-
-```python
-from transformers import AutoProcessor
-tokenizer = AutoProcessor.from_pretrained("ahad-j/nat-action-tokenizer", trust_remote_code=True)
-```
-
 ## Normalization (on by default)
 
 The tokenizer was trained on actions in [-1, 1]. With `normalize=True` (the default) every column is mapped from
@@ -48,8 +40,7 @@ its min and max to [-1, 1] before encoding (values outside are clipped) and deco
 work in your own units throughout. Set the min and max with `fit(dataset_actions)`, or pass them directly:
 
 ```python
-tokenizer = AutoProcessor.from_pretrained("ahad-j/nat-action-tokenizer", trust_remote_code=True,
-                                          action_min=[...], action_max=[...])
+tokenizer = NATActionTokenizer.from_pretrained(action_min=[...], action_max=[...])
 ```
 
 If your actions are already in [-1, 1], pass `normalize=False` to both calls:

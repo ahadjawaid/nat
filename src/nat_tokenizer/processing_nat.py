@@ -2,7 +2,7 @@
 """NAT action tokenizer: 32-step action chunks to 14 time-ordered tokens per group of up to 7 action columns, and back.
 
     from nat_tokenizer import NATActionTokenizer
-    tokenizer = NATActionTokenizer.from_pretrained()   # or AutoProcessor.from_pretrained(REPOSITORY, trust_remote_code=True)
+    tokenizer = NATActionTokenizer.from_pretrained()
     tokenizer.fit(dataset_actions)                 # per-column min and max, mapped to [-1, 1]
     tokens = tokenizer(action_chunks)              # (batch, 32, action_dim) or (32, action_dim) -> list of token lists
     actions = tokenizer.decode(tokens, action_dim=action_dim)   # -> (batch, 32, action_dim), in the original units
