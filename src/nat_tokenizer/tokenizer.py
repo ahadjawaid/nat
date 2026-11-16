@@ -18,7 +18,7 @@ from safetensors.torch import load_file
 
 from .model import NATCodec
 
-CONFIG_NAME, WEIGHTS_NAME, REPOSITORY = "config.json", "model.safetensors", "ahad-j/nat-action-tokenizer"
+CONFIG_NAME, WEIGHTS_NAME, REPOSITORY = "config.json", "model.safetensors", "ahad-j/nat-tokenizer-h32-l4-c6400"
 SAVED_FILES = (WEIGHTS_NAME, "README.md", "LICENSE")
 
 

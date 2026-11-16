@@ -13,13 +13,13 @@ pip install nat-tokenizer
 or from source: `pip install "git+https://github.com/ahadjawaid/nat.git"`.
 
 The weights and config download from the Hugging Face repository
-[ahad-j/nat-action-tokenizer](https://huggingface.co/ahad-j/nat-action-tokenizer) on first use.
+[ahad-j/nat-tokenizer-h32-l4-c6400](https://huggingface.co/ahad-j/nat-tokenizer-h32-l4-c6400) on first use.
 
 ```python
 import numpy as np
 from nat_tokenizer import NATActionTokenizer
 
-tokenizer = NATActionTokenizer.from_pretrained()   # downloads ahad-j/nat-action-tokenizer
+tokenizer = NATActionTokenizer.from_pretrained()   # downloads ahad-j/nat-tokenizer-h32-l4-c6400
 
 # 1. Fit the normalization once, on your dataset's actions (any shape ending in action_dim).
 tokenizer.fit(dataset_actions)
