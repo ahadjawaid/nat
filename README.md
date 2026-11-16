@@ -7,8 +7,10 @@ before it has generated the whole chunk.
 ## Quick start
 
 ```bash
-pip install "git+https://github.com/ahadjawaid/nat.git"
+pip install nat-tokenizer
 ```
+
+or from source: `pip install "git+https://github.com/ahadjawaid/nat.git"`.
 
 The weights and config download from the Hugging Face repository
 [ahad-j/nat-action-tokenizer](https://huggingface.co/ahad-j/nat-action-tokenizer) on first use.
