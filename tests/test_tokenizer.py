@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Ahad Jawaid
 import numpy as np
 import pytest
 import torch

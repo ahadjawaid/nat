@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Ahad Jawaid
 """NAT action tokenizer: 32-step action chunks to 14 time-ordered tokens per group of up to 7 action columns, and back.
 
     from nat_tokenizer import NATActionTokenizer
