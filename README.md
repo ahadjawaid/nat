@@ -11,8 +11,7 @@ pip install "git+https://github.com/ahadjawaid/nat.git"
 ```
 
 The weights and config download from the Hugging Face repository
-[ahad-j/nat-action-tokenizer](https://huggingface.co/ahad-j/nat-action-tokenizer) on first use. While the GitHub and
-Hugging Face repositories are private, install and load with an account that can read them (`huggingface-cli login`).
+[ahad-j/nat-action-tokenizer](https://huggingface.co/ahad-j/nat-action-tokenizer) on first use.
 
 ```python
 import numpy as np
