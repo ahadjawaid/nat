@@ -42,7 +42,8 @@ from transformers import AutoProcessor
 tokenizer = AutoProcessor.from_pretrained("ahad-j/nat-action-tokenizer", trust_remote_code=True)
 ```
 
-Tokens and reconstructions are identical to the reference NAT implementation (tested on CPU and GPU).
+Tokens and reconstructions are identical to the original NAT research code this tokenizer was trained and evaluated
+with (checked on CPU and GPU); this package is a standalone export of it.
 
 ## Normalization (on by default)
 
@@ -111,9 +112,9 @@ loading needs only torch and numpy.
 
 ## Reconstruction on robot benchmarks, and speed
 
-Random 32-step chunks of each benchmark's demonstrations, each normalized by its own min and max (MetaWorld's actions clipped to the [-1, 1] its simulator executes). Errors are mean absolute differences between the input and its reconstruction; the reference is the NAT implementation this package reproduces.
+Random 32-step chunks of each benchmark's demonstrations, each normalized by its own min and max (MetaWorld's actions clipped to the [-1, 1] its simulator executes). Errors are mean absolute differences between the input and its reconstruction. "Original NAT code" is the research code this tokenizer was trained with, run on the same chunks; this package reproduces it exactly.
 
-| data | chunks x shape | MAE in [-1, 1] units | MAE | max error | reference MAE | identical tokens |
+| data | chunks x shape | MAE in [-1, 1] units | MAE | max error | original NAT code MAE | identical tokens |
 |---|---|---|---|---|---|---|
 | LIBERO-10 | 1000 x (32, 7) | 0.0304 | 0.0210 | 1.9762 | 0.0210 | 100.0% |
 | MetaWorld mt4 (clipped) | 1000 x (32, 4) | 0.0651 | 0.0651 | 1.7578 | 0.0651 | 100.0% |
@@ -123,13 +124,13 @@ Random 32-step chunks of each benchmark's demonstrations, each normalized by its
 | implementation | device | batch of 32 x 7 chunks | encode ms | decode ms |
 |---|---|---|---|---|
 | nat-tokenizer | cpu, eager | 1 | 10.07 ± 0.03 | 19.47 ± 0.39 |
-| reference | cpu, eager | 1 | 12.14 ± 0.10 | 23.72 ± 0.26 |
+| original NAT code | cpu, eager | 1 | 12.14 ± 0.10 | 23.72 ± 0.26 |
 | nat-tokenizer | cpu, eager | 64 | 318.17 ± 0.08 | 243.77 ± 0.62 |
-| reference | cpu, eager | 64 | 321.37 ± 0.63 | 251.12 ± 0.62 |
+| original NAT code | cpu, eager | 64 | 321.37 ± 0.63 | 251.12 ± 0.62 |
 | nat-tokenizer | cuda, eager | 1 | 2.72 ± 0.07 | 4.68 ± 0.13 |
-| reference | cuda, eager | 1 | 5.84 ± 0.32 | 8.79 ± 0.20 |
+| original NAT code | cuda, eager | 1 | 5.84 ± 0.32 | 8.79 ± 0.20 |
 | nat-tokenizer | cuda, eager | 64 | 2.71 ± 0.04 | 4.99 ± 0.12 |
-| reference | cuda, eager | 64 | 5.58 ± 0.13 | 8.95 ± 0.16 |
+| original NAT code | cuda, eager | 64 | 5.58 ± 0.13 | 8.95 ± 0.16 |
 | nat-tokenizer | cuda, CUDA graphs | 1 | 0.44 ± 0.02 | 2.07 ± 0.02 |
 | nat-tokenizer | cuda, CUDA graphs | 64 | 0.74 ± 0.01 | 3.49 ± 0.03 |
 
@@ -139,3 +140,7 @@ Random 32-step chunks of each benchmark's demonstrations, each normalized by its
 pip install -e ".[test]"
 pytest
 ```
+
+## License
+
+MIT, see [LICENSE](LICENSE).

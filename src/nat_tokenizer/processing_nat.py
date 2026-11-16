@@ -44,7 +44,7 @@ class NATActionTokenizer:
     def save_pretrained(self, directory):
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)
-        for name in (MODEL_NAME, Path(__file__).name, "README.md"):
+        for name in (MODEL_NAME, Path(__file__).name, "README.md", "LICENSE"):
             if (self.folder / name).exists() and self.folder != directory:
                 (directory / name).write_bytes((self.folder / name).read_bytes())
         config = json.loads((self.folder / CONFIG_NAME).read_text())
