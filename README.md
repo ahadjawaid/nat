@@ -101,7 +101,7 @@ the weights (`model.safetensors`) and a JSON config; the network is plain PyTorc
 
 ## Reconstruction on robot benchmarks, and speed
 
-Random 32-step chunks of each benchmark's demonstrations, each normalized by its own min and max (MetaWorld's actions clipped to the [-1, 1] its simulator executes). Errors are mean absolute differences between the input and its reconstruction. Speed is in milliseconds per call on an RTX 4090 (shared with another job while measured) and 4 CPU threads, mean and SD over 20 calls.
+Random 32-step chunks of each benchmark's demonstrations, each normalized by its own min and max (MetaWorld's actions clipped to the [-1, 1] its simulator executes). Errors are mean absolute differences between the input and its reconstruction. Speed is in milliseconds per call on an RTX 4090 and 4 CPU threads, mean and SD over 20 calls.
 
 | benchmark | chunks x shape | MAE in [-1, 1] units | MAE | max error |
 |---|---|---|---|---|
@@ -112,12 +112,12 @@ Random 32-step chunks of each benchmark's demonstrations, each normalized by its
 
 | device | batch of 32 x 7 chunks | encode ms | decode ms |
 |---|---|---|---|
-| cpu, eager | 1 | 11.57 ± 0.39 | 29.86 ± 4.06 |
-| cpu, eager | 64 | 322.06 ± 1.76 | 263.23 ± 6.67 |
-| cuda, eager | 1 | 6.54 ± 1.67 | 11.07 ± 1.18 |
-| cuda, eager | 64 | 7.86 ± 2.41 | 12.67 ± 1.80 |
-| cuda, CUDA graphs | 1 | 0.71 ± 0.57 | 2.44 ± 0.39 |
-| cuda, CUDA graphs | 64 | 1.05 ± 0.35 | 5.18 ± 2.09 |
+| cpu, eager | 1 | 11.11 ± 0.05 | 23.12 ± 0.28 |
+| cpu, eager | 64 | 320.02 ± 0.90 | 249.54 ± 0.68 |
+| cuda, eager | 1 | 4.21 ± 0.04 | 8.02 ± 0.57 |
+| cuda, eager | 64 | 4.54 ± 0.11 | 8.46 ± 0.55 |
+| cuda, CUDA graphs | 1 | 0.50 ± 0.01 | 2.14 ± 0.02 |
+| cuda, CUDA graphs | 64 | 0.82 ± 0.01 | 3.55 ± 0.03 |
 
 ## Development
 
