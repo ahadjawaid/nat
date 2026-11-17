@@ -53,7 +53,18 @@ A column whose min equals its max is encoded as 0 and decoded back to its consta
 
 Within a group the 14 tokens are time ordered: the first 4 decode the chunk's first 8 steps, the first 7 its first 16,
 the first 11 its first 24, and all 14 the whole chunk. A prefix decodes exactly the same first steps as the full chunk,
-so a model can execute actions while it is still generating:
+so a model can execute actions while it is still generating. `stream()` decodes one chunk token by token and returns each
+latent's 8 actions as soon as its tokens are complete:
+
+```python
+stream = tokenizer.stream(action_dim=7)
+for token in generated_tokens:                # one at a time, as your model generates them
+    actions = stream.push(token)              # (8, 7) when a latent completes, else (0, 7)
+    if len(actions):
+        robot.execute(actions)
+```
+
+A prefix of whole latents also decodes directly:
 
 ```python
 for steps in (8, 16, 24, 32):
@@ -87,6 +98,7 @@ boundary differs).
 | `tokenizer.fit(actions)` | per-column min and max of your actions (returns the tokenizer) |
 | `tokenizer(chunks, normalize=True)` | `(batch, 32, d)` or `(32, d)` actions to a list of token lists |
 | `tokenizer.decode(tokens, action_dim, normalize=True)` | token lists (whole chunks, or one group's prefix) to `(batch, steps, d)` actions |
+| `tokenizer.stream(action_dim, normalize=True)` | a decoder whose `push(token)` returns each latent's actions as soon as its tokens are generated |
 | `tokenizer.prefix_token_count(steps)` | tokens that decode the first `steps` (8, 16, 24 or 32) |
 | `tokenizer.tokens_per_chunk(action_dim)` | 14 per group of 7 columns |
 | `tokenizer.to(device, cuda_graphs=False)` | run on a device, optionally with CUDA graphs |

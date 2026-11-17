@@ -76,3 +76,24 @@ def test_gpu_and_cuda_graphs_agree_with_the_cpu(tokenizer):
 def test_the_downloaded_repository_holds_only_data(tokenizer):
     assert sorted(path.name for path in tokenizer.folder.iterdir()) == ["LICENSE", "README.md", "config.json",
                                                                         "model.safetensors"]
+
+
+@pytest.mark.parametrize("normalize", [False, True])
+def test_streaming_returns_each_latents_actions_as_its_tokens_arrive(tokenizer, normalize):
+    raw = chunks(6, low=-2.0, high=3.0)
+    tokenizer.fit(raw)
+    actions = raw if normalize else np.clip(raw, -1, 1)
+    tokens = tokenizer(actions[:1], normalize=normalize)[0]
+    stream = tokenizer.stream(action_dim=6, normalize=normalize)
+    arrived = [stream.push(token) for token in tokens]
+    assert [index + 1 for index, latent in enumerate(arrived) if len(latent)] == [4, 7, 11, 14]
+    assert {len(latent) for latent in arrived} == {0, 8}
+    np.testing.assert_allclose(np.concatenate(arrived), tokenizer.decode([tokens], action_dim=6, normalize=normalize)[0],
+                               atol=1e-6)
+    with pytest.raises(ValueError, match="complete"):
+        stream.push(tokens[0])
+
+
+def test_streaming_needs_a_single_group(tokenizer):
+    with pytest.raises(ValueError, match="single group"):
+        tokenizer.stream(action_dim=8)

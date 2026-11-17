@@ -8,7 +8,8 @@
     actions = tokenizer.decode(tokens, action_dim=action_dim)   # -> (batch, 32, action_dim), in the original units
 
 With normalize=False the actions must already lie in [-1, 1]. Tokens are ids in [0, vocab_size). Each group's tokens are
-time-ordered, so a prefix of prefix_token_count(steps) tokens decodes the chunk's first steps (one group only)."""
+time-ordered, so a prefix of prefix_token_count(steps) tokens decodes the chunk's first steps (one group only), and
+stream(action_dim) returns each latent's actions as soon as a model has generated its tokens."""
 import json
 from pathlib import Path
 
@@ -74,6 +75,10 @@ class NATActionTokenizer:
     def prefix_token_count(self, steps):
         """Tokens that decode a single group's first steps (steps must end a latent: 8, 16, 24 or 32)."""
         return self.prefix_tokens[steps]
+
+    def stream(self, action_dim, normalize=True):
+        """A StreamingDecoder for one chunk whose tokens arrive one at a time (up to group_width columns)."""
+        return StreamingDecoder(self, action_dim, normalize)
 
     def __call__(self, actions, normalize=True):
         actions = np.asarray(actions, dtype=np.float32)
@@ -143,3 +148,26 @@ class NATActionTokenizer:
             raise ValueError("normalize=True needs the actions' per-column min and max: call fit(dataset_actions), pass "
                              "action_min/action_max to from_pretrained, or pass normalize=False for actions in [-1, 1]")
         return self.action_min, self.action_max
+
+
+class StreamingDecoder:
+    """Decodes one chunk while a model generates its tokens: push() each token as it is generated; when it completes a
+    latent, push() returns that latent's actions (8 steps), otherwise an empty array. The actions equal those of
+    decoding the whole chunk, since the decoder is causal."""
+
+    def __init__(self, tokenizer, action_dim, normalize=True):
+        if action_dim > tokenizer.slots:
+            raise ValueError(f"Streaming decodes a single group of up to {tokenizer.slots} action columns")
+        self.tokenizer, self.action_dim, self.normalize = tokenizer, action_dim, normalize
+        self.steps_after = {count: steps for steps, count in tokenizer.prefix_tokens.items()}
+        self.tokens, self.decoded_steps = [], 0
+
+    def push(self, token):
+        if len(self.tokens) == self.tokenizer.tokens_per_chunk(self.action_dim):
+            raise ValueError("This chunk is complete: start a new stream() for the next one")
+        self.tokens.append(int(token))
+        if len(self.tokens) not in self.steps_after:
+            return np.zeros((0, self.action_dim), dtype=np.float32)
+        actions = self.tokenizer.decode([self.tokens], self.action_dim, self.normalize)[0, self.decoded_steps:]
+        self.decoded_steps = self.steps_after[len(self.tokens)]
+        return actions
