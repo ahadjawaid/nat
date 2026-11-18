@@ -97,3 +97,16 @@ def test_streaming_returns_each_latents_actions_as_its_tokens_arrive(tokenizer, 
 def test_streaming_needs_a_single_group(tokenizer):
     with pytest.raises(ValueError, match="single group"):
         tokenizer.stream(action_dim=8)
+
+
+def test_a_chunk_starting_with_the_executing_actions_decodes_back_to_them(tokenizer):
+    raw = chunks(7, low=-2.0, high=3.0)
+    tokenizer.fit(raw)
+    executing = raw[:, :16]
+    prefix = tokenizer.tokens_starting_with(executing)
+    assert [len(tokens) for tokens in prefix] == [tokenizer.prefix_token_count(16)] * len(raw)
+    padded = np.concatenate([executing, np.repeat(executing[:, -1:], 16, axis=1)], axis=1)
+    np.testing.assert_allclose(tokenizer.decode(prefix, action_dim=7),
+                               tokenizer.decode(tokenizer(padded), action_dim=7)[:, :16], atol=1e-5)
+    with pytest.raises(ValueError, match="steps"):
+        tokenizer.tokens_starting_with(raw[:, :10])

@@ -64,6 +64,15 @@ for token in generated_tokens:                # one at a time, as your model gen
         robot.execute(actions)
 ```
 
+For real-time chunking, the next chunk can be generated while the robot executes the last actions of the current
+one, so that it starts with them. `tokens_starting_with` turns those actions into the first tokens of the next chunk;
+the model generates only the tokens after them, and the robot switches to the new chunk without a jump:
+
+```python
+prefix = tokenizer.tokens_starting_with(executing_actions)   # (batch, steps, d), steps ending a latent (8, 16 or 24)
+# continue the model's generation after `prefix`, then decode the whole token list
+```
+
 A prefix of whole latents also decodes directly:
 
 ```python
@@ -99,6 +108,7 @@ boundary differs).
 | `tokenizer(chunks, normalize=True)` | `(batch, 32, d)` or `(32, d)` actions to a list of token lists |
 | `tokenizer.decode(tokens, action_dim, normalize=True)` | token lists (whole chunks, or one group's prefix) to `(batch, steps, d)` actions |
 | `tokenizer.stream(action_dim, normalize=True)` | a decoder whose `push(token)` returns each latent's actions as soon as its tokens are generated |
+| `tokenizer.tokens_starting_with(actions, normalize=True)` | the first tokens of a chunk that starts with these actions (real-time chunking) |
 | `tokenizer.prefix_token_count(steps)` | tokens that decode the first `steps` (8, 16, 24 or 32) |
 | `tokenizer.tokens_per_chunk(action_dim)` | 14 per group of 7 columns |
 | `tokenizer.to(device, cuda_graphs=False)` | run on a device, optionally with CUDA graphs |

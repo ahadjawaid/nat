@@ -76,6 +76,18 @@ class NATActionTokenizer:
         """Tokens that decode a single group's first steps (steps must end a latent: 8, 16, 24 or 32)."""
         return self.prefix_tokens[steps]
 
+    def tokens_starting_with(self, actions, normalize=True):
+        """Tokens that make a chunk start with these actions, for real-time chunking: the actions still executing
+        while the next chunk is generated. A model generates the next chunk's remaining tokens after these. Takes
+        (batch, steps, d) or (steps, d) actions, steps ending a latent, up to group_width columns."""
+        actions = np.asarray(actions, dtype=np.float32)
+        actions = actions[None] if actions.ndim == 2 else actions
+        steps = actions.shape[1]
+        if steps not in self.prefix_tokens or actions.shape[-1] > self.slots:
+            raise ValueError(f"Expected {sorted(self.prefix_tokens)} steps of up to {self.slots} action columns")
+        repeated = np.repeat(actions[:, -1:], self.horizon - steps, axis=1)
+        return [tokens[:self.prefix_tokens[steps]] for tokens in self(np.concatenate([actions, repeated], 1), normalize)]
+
     def stream(self, action_dim, normalize=True):
         """A StreamingDecoder for one chunk whose tokens arrive one at a time (up to group_width columns)."""
         return StreamingDecoder(self, action_dim, normalize)
