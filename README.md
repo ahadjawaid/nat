@@ -4,7 +4,7 @@ Turns robot action chunks into discrete tokens for a vision-language-action mode
 Every 32-step chunk of up to 7 action columns becomes **14 tokens**, in time order, so a model can stream actions
 before it has generated the whole chunk.
 
-Paper: [NAT: Scaling Causal Neural Action Tokenizers Across Embodiments](https://ahadjawaid.com/nat-paper).
+Paper: [NAT: Scaling Causal Neural Action Tokenizers Across Embodiments](https://arxiv.org/abs/2611.28873).
 
 ## Quick start
 
@@ -156,7 +156,11 @@ pytest
 @misc{jawaid2026nat,
   title={NAT: Scaling Causal Neural Action Tokenizers Across Embodiments},
   author={Ahad Jawaid and Alexander Swerdlow and Yu Xiang},
-  year={2026}
+  year={2026},
+  eprint={2611.28873},
+  archivePrefix={arXiv},
+  primaryClass={cs.RO},
+  url={https://arxiv.org/abs/2611.28873}
 }
 ```
 
